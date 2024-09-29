@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Trash2, CheckCircle } from 'lucide-react';
+import { PlusCircle, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 
-const BASE_URI = import.meta.env.MODE==="development" ? 'http://localhost:3000/api' :"/api"
+const BASE_URI = import.meta.env.MODE === "development" ? 'http://localhost:3000/api' : "/api";
 
 const TodoManager = () => {
   const [todos, setTodos] = useState([]);
@@ -82,34 +82,41 @@ const TodoManager = () => {
           </button>
         </div>
       </form>
-      <ul className="space-y-3">
-        {todos.map((todo) => (
-          <li
-            key={todo.id}
-            className="flex items-center justify-between p-3 bg-gray-100 rounded-md"
-          >
-            <span className={`flex-grow ${todo.completed ? 'line-through text-gray-500' : ''}`}>
-              {todo.body}
-            </span>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => toggleTodo(todo.id)}
-                className={`p-1 rounded-full ${
-                  todo.completed ? 'text-green-500 hover:text-green-600' : 'text-gray-500 hover:text-gray-600'
-                }`}
-              >
-                <CheckCircle size={20} />
-              </button>
-              <button
-                onClick={() => deleteTodo(todo.id)}
-                className="p-1 text-red-500 hover:text-red-600 rounded-full"
-              >
-                <Trash2 size={20} />
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      {todos.length === 0 ? (
+        <div className="text-center text-gray-500 py-4">
+          <AlertCircle className="mx-auto mb-2" size={24} />
+          <p>Task list is empty. Add a new task above!</p>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {todos.map((todo) => (
+            <li
+              key={todo.id}
+              className="flex items-center justify-between p-3 bg-gray-100 rounded-md"
+            >
+              <span className={`flex-grow ${todo.completed ? 'line-through text-gray-500' : ''}`}>
+                {todo.body}
+              </span>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => toggleTodo(todo.id)}
+                  className={`p-1 rounded-full ${
+                    todo.completed ? 'text-green-500 hover:text-green-600' : 'text-gray-500 hover:text-gray-600'
+                  }`}
+                >
+                  <CheckCircle size={20} />
+                </button>
+                <button
+                  onClick={() => deleteTodo(todo.id)}
+                  className="p-1 text-red-500 hover:text-red-600 rounded-full"
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
