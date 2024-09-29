@@ -4,7 +4,7 @@ import { PlusCircle, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 const BASE_URI = import.meta.env.MODE === "development" ? 'http://localhost:3000/api' : '/api';
 
 const TodoManager = () => {
-  const [todos, setTodos] = useState([]);
+  const [todos, setTodos] = useState([]);  // Initialize todos as an empty array
   const [newTodo, setNewTodo] = useState('');
 
   // Fetch todos on component mount
@@ -17,10 +17,12 @@ const TodoManager = () => {
     try {
       const response = await fetch(`${BASE_URI}/todos`);
       if (!response.ok) throw new Error('Failed to fetch todos');
+      
       const data = await response.json();
-      setTodos(data);
+      setTodos(data || []);  // Use an empty array if data is null
     } catch (error) {
       console.error('Error fetching todos:', error);
+      setTodos([]);  // Set an empty array in case of error
     }
   };
 
