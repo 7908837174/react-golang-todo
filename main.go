@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
-
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -52,11 +52,11 @@ func main() {
 	collection = client.Database("golang-todo").Collection("todos")
 
 	app := fiber.New()
-	// app.Use(cors.New())
-	// app.Use(cors.New(cors.Config{
-	// 	AllowOrigins: "http://localhost:5173, http://localhost:3000",
-	// 	AllowHeaders: "Origin, Content-Type, Accept",
-	// }))
+	app.Use(cors.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:5173, http://localhost:3000",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
 
 	if os.Getenv("ENV")=="production"{
 		app.Static("/","./client/dist")
