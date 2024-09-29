@@ -33,10 +33,7 @@ func main() {
 		}
 	}
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading.env file")
-	}
+	
 	MONGODB_URI := os.Getenv("MONGO_URI")
 	clientOptions := options.Client().ApplyURI(MONGODB_URI)
 	client, err := mongo.Connect(context.Background(), clientOptions)
