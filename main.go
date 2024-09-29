@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,6 +25,14 @@ var collection *mongo.Collection
 
 func main() {
 	fmt.Println("Hello world")
+	//load the env file if not in production
+	if os.Getenv("ENV") != "production" {
+		err:= godotenv.Load(".env")
+		if err!= nil {
+			log.Fatal("Error loading.env file")
+		}
+	}
+
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading.env file")
@@ -46,6 +55,15 @@ func main() {
 	collection = client.Database("golang-todo").Collection("todos")
 
 	app := fiber.New()
+	// app.Use(cors.New())
+	// app.Use(cors.New(cors.Config{
+	// 	AllowOrigins: "http://localhost:5173, http://localhost:3000",
+	// 	AllowHeaders: "Origin, Content-Type, Accept",
+	// }))
+
+	if os.Getenv("ENV")=="production"{
+		app.Static("/","./client/dist")
+	}
 
 	app.Get("/api/todos", getTodos)
 	app.Post("/api/todos", createTodo)
@@ -158,21 +176,21 @@ func updateTodo(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"success": true})
 }
 
-func deleteTodo( c *fiber.Ctx) error {
+func deleteTodo(c *fiber.Ctx) error {
 	id := c.Params("id")
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-            "error": "Invalid ID",
-        })
+			"error": "Invalid ID",
+		})
 	}
-	filter := bson.M{"_id":objectID}
+	filter := bson.M{"_id": objectID}
 	res, err := collection.DeleteOne(context.Background(), filter)
 	fmt.Println(res)
-	if err!= nil {
+	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-            "error": err.Error(),
-        })
+			"error": err.Error(),
+		})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"success": true})
 
