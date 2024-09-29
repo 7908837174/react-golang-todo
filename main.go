@@ -27,9 +27,9 @@ func main() {
 	fmt.Println("Hello world")
 	//load the env file if not in production
 	if os.Getenv("ENV") != "production" {
-		err:= godotenv.Load(".env")
-		if err!= nil {
-			log.Fatal("Error loading.env file")
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Println("Warning: Error loading .env file. Using default environment variables.")
 		}
 	}
 
