@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 
-const BASE_URI = import.meta.env.MODE === "development" ? 'http://localhost:3000/api' : "/api";
+const BASE_URI = import.meta.env.MODE === "development" ? 'http://localhost:3000/api' : '/api';
 
 const TodoManager = () => {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
 
+  // Fetch todos on component mount
   useEffect(() => {
     fetchTodos();
   }, []);
 
+  // Fetch all todos from the API
   const fetchTodos = async () => {
     try {
       const response = await fetch(`${BASE_URI}/todos`);
+      if (!response.ok) throw new Error('Failed to fetch todos');
       const data = await response.json();
       setTodos(data);
     } catch (error) {
@@ -21,41 +24,53 @@ const TodoManager = () => {
     }
   };
 
+  // Add a new todo
   const addTodo = async (e) => {
     e.preventDefault();
-    if (!newTodo.trim()) return;
+    if (!newTodo.trim()) return; // Prevent adding empty todo
     try {
       const response = await fetch(`${BASE_URI}/todos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ body: newTodo, completed: false }),
       });
+      if (!response.ok) throw new Error('Failed to add todo');
       const data = await response.json();
       setTodos([...todos, data]);
-      setNewTodo('');
+      setNewTodo(''); // Clear input after adding
     } catch (error) {
       console.error('Error adding todo:', error);
     }
   };
 
+  // Toggle todo completion status
   const toggleTodo = async (id) => {
     try {
-      await fetch(`${BASE_URI}/todos/${id}`, {
+      const todo = todos.find(t => t.id === id);
+      const updatedStatus = !todo.completed;
+
+      const response = await fetch(`${BASE_URI}/todos/${id}`, {
         method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: updatedStatus }),
       });
-      setTodos(todos.map(todo =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      if (!response.ok) throw new Error('Failed to update todo');
+
+      setTodos(todos.map(todo => 
+        todo.id === id ? { ...todo, completed: updatedStatus } : todo
       ));
     } catch (error) {
       console.error('Error updating todo:', error);
     }
   };
 
+  // Delete a todo
   const deleteTodo = async (id) => {
     try {
-      await fetch(`${BASE_URI}/todos/${id}`, {
+      const response = await fetch(`${BASE_URI}/todos/${id}`, {
         method: 'DELETE',
       });
+      if (!response.ok) throw new Error('Failed to delete todo');
       setTodos(todos.filter(todo => todo.id !== id));
     } catch (error) {
       console.error('Error deleting todo:', error);
@@ -65,6 +80,8 @@ const TodoManager = () => {
   return (
     <div className="max-w-md mx-auto p-6 w-5/6 bg-white rounded-lg shadow-xl">
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Todo Manager</h1>
+
+      {/* Form to add a new todo */}
       <form onSubmit={addTodo} className="mb-6">
         <div className="flex items-center">
           <input
@@ -82,6 +99,8 @@ const TodoManager = () => {
           </button>
         </div>
       </form>
+
+      {/* Display todos */}
       {todos.length === 0 ? (
         <div className="text-center text-gray-500 py-4">
           <AlertCircle className="mx-auto mb-2" size={24} />
